@@ -11,12 +11,12 @@ const Footer = () => {
           <span>{new Date().getFullYear()} MockMate AI. All Rights Reserved.</span>
         </div>
 
-       
+
 
         {/* Social Media Links */}
         <div className="flex space-x-4">
           <a
-            href="https://github.com/mockmate"
+            href="https://github.com/sunnysahani070-ops/MockInterviewAi"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-indigo-500 transition-colors"
@@ -25,7 +25,7 @@ const Footer = () => {
             <Github className="h-6 w-6" />
           </a>
           <a
-            href="https://linkedin.com/company/mockmate"
+            href="https://www.linkedin.com/in/sunny-sahani-911252402/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-indigo-500 transition-colors"
