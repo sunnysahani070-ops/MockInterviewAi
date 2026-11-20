@@ -68,6 +68,31 @@ function AddNewInterview() {
     }
   };
 
+  const safeParseJSON = (str) => {
+    try {
+      return JSON.parse(str);
+    } catch (err) {
+      // Recovery 1: Truncated JSON array repair
+      const lastObjectEnd = str.lastIndexOf('}');
+      if (lastObjectEnd !== -1) {
+        const trimmed = str.slice(0, lastObjectEnd + 1);
+        const arrayStart = trimmed.indexOf('[');
+        if (arrayStart !== -1) {
+          try {
+            return JSON.parse(trimmed.slice(arrayStart) + ']');
+          } catch (e2) {}
+        }
+      }
+      // Recovery 2: Sanitize unescaped control characters
+      try {
+        const sanitized = str.replace(/[\u0000-\u001F\u007F-\u009F]/g, " ");
+        return JSON.parse(sanitized);
+      } catch (e3) {}
+
+      throw err;
+    }
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -98,7 +123,7 @@ function AddNewInterview() {
       const match = cleaned.match(/\[[\s\S]*\]/) || cleaned.match(/\{[\s\S]*\}/);
       const jsonString = match ? match[0] : cleaned;
       
-      const parsedResp = JSON.parse(jsonString);
+      const parsedResp = safeParseJSON(jsonString);
       const mockResponse = Array.isArray(parsedResp)
         ? parsedResp
         : (parsedResp?.interview_questions || parsedResp?.questions || parsedResp?.interviewQuestions || Object.values(parsedResp || {}).find(Array.isArray) || []);
