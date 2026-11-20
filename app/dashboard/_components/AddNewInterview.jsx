@@ -73,22 +73,32 @@ function AddNewInterview() {
     setLoading(true);
   
     const inputPrompt = `Job position: ${jobPosition}, Job Description: ${jobDescription}, Years of Experience: ${jobExperience}, Target Difficulty Level: ${difficulty}.
-    Generate exactly ${questionCount} interview questions and ideal answers in JSON format as a JSON array of objects with "question" and "answer" fields. Example: [{"question": "...", "answer": "..."}].
+    Generate exactly ${questionCount} interview questions and ideal answers in JSON format as a JSON array of objects with "question" and "answer" fields.
+    Format:
+    [
+      {
+        "question": "Clear, direct technical question here",
+        "answer": "Concise, high-impact model answer (3-5 key sentences, strictly under 120 words)"
+      }
+    ]
     Requirements:
     - Target difficulty level is strictly "${difficulty}".
     - If Easy: focus on fundamentals, core syntax, definitions, and essential concepts.
     - If Medium: focus on practical implementation, debugging, state management, common patterns, and problem solving.
     - If Hard: focus on deep architectural internals, concurrency, performance trade-offs, scalability, and complex system design scenarios.
     - Questions must realistically assess candidates with ${jobExperience} years of experience.
-    - Return ONLY the JSON array without any wrapping object.`;
+    - Keep each "answer" concise, focused on core technical points (under 120 words) so it remains punchy and readable.
+    - Return ONLY the JSON array.`;
   
     try {
       const result = await chatSession.sendMessage(inputPrompt);
       const responseText = await result.response.text();
       
-      const cleanedResponse = responseText.replace(/```json\n?|```/g, '').trim();
+      const cleaned = responseText.replace(/```(?:json)?\s*([\s\S]*?)\s*```/g, '$1').trim();
+      const match = cleaned.match(/\[[\s\S]*\]/) || cleaned.match(/\{[\s\S]*\}/);
+      const jsonString = match ? match[0] : cleaned;
       
-      const parsedResp = JSON.parse(cleanedResponse);
+      const parsedResp = JSON.parse(jsonString);
       const mockResponse = Array.isArray(parsedResp)
         ? parsedResp
         : (parsedResp?.interview_questions || parsedResp?.questions || parsedResp?.interviewQuestions || Object.values(parsedResp || {}).find(Array.isArray) || []);
