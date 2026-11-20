@@ -53,6 +53,8 @@ function AddNewInterview() {
   const [jobPosition, setJobPosition] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [jobExperience, setJobExperience] = useState("");
+  const [difficulty, setDifficulty] = useState("Medium");
+  const [questionCount, setQuestionCount] = useState(5);
   const [loading, setLoading] = useState(false);
   const { user } = useUser();
   const router = useRouter();
@@ -70,8 +72,15 @@ function AddNewInterview() {
     e.preventDefault();
     setLoading(true);
   
-    const inputPrompt = `Job position: ${jobPosition}, Job Description: ${jobDescription}, Years of Experience: ${jobExperience}.
-    Generate 5 interview questions and answers in JSON format as a JSON array of objects with "question" and "answer" fields. Example: [{"question": "...", "answer": "..."}]`;
+    const inputPrompt = `Job position: ${jobPosition}, Job Description: ${jobDescription}, Years of Experience: ${jobExperience}, Target Difficulty Level: ${difficulty}.
+    Generate exactly ${questionCount} interview questions and ideal answers in JSON format as a JSON array of objects with "question" and "answer" fields. Example: [{"question": "...", "answer": "..."}].
+    Requirements:
+    - Target difficulty level is strictly "${difficulty}".
+    - If Easy: focus on fundamentals, core syntax, definitions, and essential concepts.
+    - If Medium: focus on practical implementation, debugging, state management, common patterns, and problem solving.
+    - If Hard: focus on deep architectural internals, concurrency, performance trade-offs, scalability, and complex system design scenarios.
+    - Questions must realistically assess candidates with ${jobExperience} years of experience.
+    - Return ONLY the JSON array without any wrapping object.`;
   
     try {
       const result = await chatSession.sendMessage(inputPrompt);
@@ -91,6 +100,8 @@ function AddNewInterview() {
           jobPosition: jobPosition,
           jobDesc: jobDescription,
           jobExperience: jobExperience,
+          difficulty: difficulty,
+          questionCount: String(mockResponse.length || questionCount),
           createdBy: user?.primaryEmailAddress?.emailAddress,
           createdAt: moment().format('DD-MM-YYYY'),
         }).returning({ mockId: MockInterview.mockId });
@@ -159,7 +170,7 @@ function AddNewInterview() {
                   />
                 </div>
                 <div className="my-3">
-                  <label>Years of Experience</label>
+                  <label className="block text-sm font-medium mb-1">Years of Experience</label>
                   <Input
                     placeholder="Ex. 5"
                     type="number"
@@ -169,6 +180,71 @@ function AddNewInterview() {
                     required
                     onChange={(e) => setJobExperience(e.target.value)}
                   />
+                </div>
+
+                {/* Difficulty Selector */}
+                <div className="my-3">
+                  <label className="block text-sm font-medium mb-1">Interview Difficulty</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { level: "Easy", desc: "Junior / Basics", color: "hover:border-green-500" },
+                      { level: "Medium", desc: "Mid / Core Skills", color: "hover:border-blue-500" },
+                      { level: "Hard", desc: "Senior / Deep Dive", color: "hover:border-purple-500" },
+                    ].map(({ level, desc, color }) => (
+                      <button
+                        type="button"
+                        key={level}
+                        onClick={() => setDifficulty(level)}
+                        className={`p-2.5 rounded-lg border text-left transition-all ${color} ${
+                          difficulty === level
+                            ? "border-indigo-600 bg-indigo-50/70 text-indigo-900 ring-2 ring-indigo-500/30"
+                            : "border-gray-200 hover:bg-gray-50 text-gray-700"
+                        }`}
+                      >
+                        <div className="font-semibold text-sm">{level}</div>
+                        <div className="text-[11px] text-gray-500">{desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Number of Questions */}
+                <div className="my-3">
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="block text-sm font-medium">Number of Questions</label>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">
+                      {questionCount} Questions
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1.5 flex-1">
+                      {[3, 5, 7, 10].map((num) => (
+                        <button
+                          type="button"
+                          key={num}
+                          onClick={() => setQuestionCount(num)}
+                          className={`flex-1 py-1.5 text-xs font-medium rounded-md border transition-all ${
+                            questionCount === num
+                              ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                              : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                          }`}
+                        >
+                          {num} Qs
+                        </button>
+                      ))}
+                    </div>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="15"
+                      value={questionCount}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        if (!isNaN(val)) setQuestionCount(Math.min(15, Math.max(1, val)));
+                      }}
+                      className="w-20 text-center"
+                    />
+                  </div>
                 </div>
               </div>
               <div className="flex gap-5 justify-end">

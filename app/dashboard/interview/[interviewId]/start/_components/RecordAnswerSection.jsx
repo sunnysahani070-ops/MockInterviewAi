@@ -111,7 +111,26 @@ const RecordAnswerSection = ({
         : (mockInterviewQuestion?.interview_questions || mockInterviewQuestion?.questions || Object.values(mockInterviewQuestion || {}).find(Array.isArray) || []);
       const currentQuestion = questionsList[activeQuestionIndex];
 
-      const feedbackPrompt = `Question: ${currentQuestion?.question}, User Answer: ${userAnswer}. Please give a rating out of 10 and feedback on improvement in JSON format { "rating": <number>, "feedback": <text> }`;
+      const feedbackPrompt = `You are a senior technical interviewer evaluating a candidate for the position: "${interviewData?.jobPosition || 'Software Engineer'}" (${interviewData?.jobExperience || '0'} years experience, ${interviewData?.difficulty || 'Medium'} difficulty).
+
+Question: "${currentQuestion?.question}"
+Ideal Model Answer: "${currentQuestion?.answer}"
+Candidate's Spoken Answer: "${userAnswer}"
+
+Evaluate the candidate's answer thoroughly and return ONLY a valid JSON object with the following fields:
+{
+  "rating": <number from 1 to 10>,
+  "feedback": "<concise 2-3 sentence assessment of the candidate's answer>",
+  "strengths": ["<specific positive point 1>", "<specific positive point 2>"],
+  "areasToImprove": ["<gap, missing concept, or inaccuracy 1>", "<gap 2>"],
+  "howToAnswer": "<practical, actionable step-by-step coaching advice on how to structure and deliver a top 10/10 answer for this specific question>",
+  "focusAreas": ["<core technical topic/concept 1>", "<topic 2>"]
+}
+
+Guidelines:
+- If the user answer is blank or "I don't know", give a rating of 1-3, provide encouraging feedback, and clearly explain how to answer.
+- If the answer is good, highlight nuances and advanced tips to make it exceptional.
+- Return ONLY the JSON object.`;
       
       const result = await chatSession.sendMessage(feedbackPrompt);
       const responseText = await result.response.text();
@@ -119,13 +138,25 @@ const RecordAnswerSection = ({
       const match = cleaned.match(/\{[\s\S]*\}/);
       const JsonfeedbackResp = JSON.parse(match ? match[0] : cleaned);
 
+      // Store structured feedback as JSON string in text column
+      const feedbackPayload = typeof JsonfeedbackResp === 'object' && JsonfeedbackResp !== null
+        ? JSON.stringify(JsonfeedbackResp)
+        : JSON.stringify({
+            rating: 5,
+            feedback: String(cleaned),
+            strengths: [],
+            areasToImprove: [],
+            howToAnswer: "Structure your answer with a direct definition, concrete examples, and performance trade-offs.",
+            focusAreas: []
+          });
+
       const answerRecord = {
         mockIdRef: interviewData?.mockId,
         question: currentQuestion?.question,
         correctAns: currentQuestion?.answer,
         userAns: userAnswer,
-        feedback: JsonfeedbackResp?.feedback,
-        rating: JsonfeedbackResp?.rating,
+        feedback: feedbackPayload,
+        rating: String(JsonfeedbackResp?.rating || '0'),
         userEmail: user?.primaryEmailAddress?.emailAddress,
         createdAt: moment().format("DD-MM-YYYY"),
       };

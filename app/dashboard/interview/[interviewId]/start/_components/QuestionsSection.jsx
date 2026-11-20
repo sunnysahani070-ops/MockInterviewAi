@@ -31,7 +31,7 @@ const QuestionsSection = ({mockInterviewQuestion,activeQuestionIndex}) => {
                     <Lightbulb/>
                     <strong>Note:</strong>
                 </h2>
-                <h2 className='text-sm text-primary my-2'>Enable Video Web Cam and Microphone to Start your AI Generated Mock Interview, It Has 5 questions which you can answer and at last you will get the report on the basis of your answer . NOTE: We never record your video, Web cam access you can disable at any time if you want</h2>
+                <h2 className='text-sm text-primary my-2'>Enable Video Web Cam and Microphone to Start your AI Generated Mock Interview. It has {questionsList.length} questions which you can answer and at last you will get a comprehensive performance report with actionable coaching tips and focus areas. NOTE: We never record your video. Web cam access can be disabled at any time.</h2>
             </div>
     </div>
   )

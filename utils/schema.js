@@ -6,6 +6,8 @@ export const MockInterview=pgTable('MockInterview',{
     jobPosition:varchar('jobPosition').notNull(),
     jobDesc:varchar('jobDesc').notNull(),
     jobExperience:varchar('jobExperience').notNull(),
+    difficulty:varchar('difficulty').default('Medium'),
+    questionCount:varchar('questionCount').default('5'),
     createdBy:varchar('createdBy').notNull(),
     createdAt:varchar('createdAt'),
     mockId:varchar('mockId').notNull()

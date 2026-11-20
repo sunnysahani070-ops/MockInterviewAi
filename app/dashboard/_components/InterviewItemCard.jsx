@@ -50,6 +50,20 @@ const InterviewItemCard = ({ interview }) => {
       {/* Card Content */}
       <div>
         <h2 className="font-bold text-primary">{interview?.jobPosition}</h2>
+        <div className="flex flex-wrap gap-1.5 my-1.5">
+          <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${
+            interview?.difficulty === 'Hard'
+              ? 'bg-purple-100 text-purple-700'
+              : interview?.difficulty === 'Easy'
+              ? 'bg-green-100 text-green-700'
+              : 'bg-blue-100 text-blue-700'
+          }`}>
+            {interview?.difficulty || 'Medium'}
+          </span>
+          <span className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium">
+            {interview?.questionCount || 5} Questions
+          </span>
+        </div>
         <h2 className="text-sm text-gray-500">Experience: {interview?.jobExperience} Year(s)</h2>
         <h2 className="text-sm text-gray-500">Created At: {interview?.createdAt}</h2>
       </div>

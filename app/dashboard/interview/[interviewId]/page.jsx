@@ -73,6 +73,24 @@ function Interview({ params }) {
               <strong>Years of Experience: </strong>
               {interviewData.jobExperience}
             </h2>
+            <h2 className="text-lg">
+              <strong>Difficulty Level: </strong>
+              <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                interviewData.difficulty === 'Hard'
+                  ? 'bg-purple-100 text-purple-700'
+                  : interviewData.difficulty === 'Easy'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-blue-100 text-blue-700'
+              }`}>
+                {interviewData.difficulty || 'Medium'}
+              </span>
+            </h2>
+            <h2 className="text-lg">
+              <strong>Total Questions: </strong>
+              <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                {interviewData.questionCount || 5} Questions
+              </span>
+            </h2>
           </div>
           <div className="p-5 border rounded-lg border-yellow-300 bg-yellow-100">
             <h2 className="flex gap-2 items-center text-yellow-500">
@@ -81,7 +99,7 @@ function Interview({ params }) {
             </h2>
             <h2 className="mt-3 text-yellow-500">
               Enable Video Web Cam and Microphone to Start your AI Generated Mock Interview. 
-              It has 5 questions which you can answer and will provide a report based on your answers. 
+              It has {interviewData.questionCount || 5} questions which you can answer and will provide a detailed report and coaching suggestions based on your answers. 
               NOTE: We never record your video. Web cam access can be disabled at any time.
             </h2>
           </div>
